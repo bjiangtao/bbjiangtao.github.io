@@ -8,7 +8,7 @@
       <link href="/2020/05/02/%E5%AD%A6%E4%B9%A0/redis%E9%AB%98%E5%B9%B6%E5%8F%91%E5%92%8C%E9%AB%98%E5%8F%AF%E7%94%A8/"/>
       <url>/2020/05/02/%E5%AD%A6%E4%B9%A0/redis%E9%AB%98%E5%B9%B6%E5%8F%91%E5%92%8C%E9%AB%98%E5%8F%AF%E7%94%A8/</url>
       
-        <content type="html"><![CDATA[<p>#高并发的保证<br>Redis主从架构，</p><p>#高可用的保证<br>Redis 哨兵  sentinal 2版本</p><p>#哨兵配置<br>1.至少需要3个实例</p><p>2.哨兵+redis主从的部署架构，不会保证Redis零丢失数据，只是保证Redis集群的高可用</p><p>##哨兵存在的问题</p><p>1.异步复制导致数据丢失</p><p>2.脑裂，网络异常导致master选取出现问题</p><p>##解决异步复制和脑裂导致的数据丢失</p><p>min-slaves-to-write 1</p><p>min-slaves-max-lag 10</p><p>要求至少有1个slave，数据复制和同步的延迟不能超过10秒</p><p>如果说一旦所有的slave，数据复制和同步的延迟都超过了10秒钟，那么这个时候，master就不会再接收任何请求了</p><p>上面两个配置可以减少异步复制和脑裂导致的数据丢失</p><p>（1）减少异步复制的数据丢失</p><p>有了min-slaves-max-lag这个配置，就可以确保说，一旦slave复制数据和ack延时太长，就认为可能master宕机后损失的数据太多了，那么就拒绝写请求，这样可以把master宕机时由于部分数据未同步到slave导致的数据丢失降低的可控范围内</p><p>（2）减少脑裂的数据丢失</p><p>如果一个master出现了脑裂，跟其他slave丢了连接，那么上面两个配置可以确保说，如果不能继续给指定数量的slave发送数据，而且slave超过10秒没有给自己ack消息，那么就直接拒绝客户端的写请求</p><p>这样脑裂后的旧master就不会接受client的新数据，也就避免了数据丢失</p><p>上面的配置就确保了，如果跟任何一个slave丢了连接，在10秒后发现没有slave给自己ack，那么就拒绝新的写请求</p><p>因此在脑裂场景下，最多就丢失10秒的数据</p>]]></content>
+        <content type="html"><![CDATA[<h1 id="高并发的保证"><a href="#高并发的保证" class="headerlink" title="高并发的保证"></a>高并发的保证</h1><p>Redis主从架构，</p><h1 id="高可用的保证"><a href="#高可用的保证" class="headerlink" title="高可用的保证"></a>高可用的保证</h1><p>Redis 哨兵  sentinal 2版本</p><h1 id="哨兵配置"><a href="#哨兵配置" class="headerlink" title="哨兵配置"></a>哨兵配置</h1><p>1.至少需要3个实例</p><p>2.哨兵+redis主从的部署架构，不会保证Redis零丢失数据，只是保证Redis集群的高可用</p><h2 id="哨兵存在的问题"><a href="#哨兵存在的问题" class="headerlink" title="哨兵存在的问题"></a>哨兵存在的问题</h2><p>1.异步复制导致数据丢失</p><p>2.脑裂，网络异常导致master选取出现问题</p><h2 id="解决异步复制和脑裂导致的数据丢失"><a href="#解决异步复制和脑裂导致的数据丢失" class="headerlink" title="解决异步复制和脑裂导致的数据丢失"></a>解决异步复制和脑裂导致的数据丢失</h2><p>min-slaves-to-write 1</p><p>min-slaves-max-lag 10</p><p>要求至少有1个slave，数据复制和同步的延迟不能超过10秒</p><p>如果说一旦所有的slave，数据复制和同步的延迟都超过了10秒钟，那么这个时候，master就不会再接收任何请求了</p><p>上面两个配置可以减少异步复制和脑裂导致的数据丢失</p><p>（1）减少异步复制的数据丢失</p><p>有了min-slaves-max-lag这个配置，就可以确保说，一旦slave复制数据和ack延时太长，就认为可能master宕机后损失的数据太多了，那么就拒绝写请求，这样可以把master宕机时由于部分数据未同步到slave导致的数据丢失降低的可控范围内</p><p>（2）减少脑裂的数据丢失</p><p>如果一个master出现了脑裂，跟其他slave丢了连接，那么上面两个配置可以确保说，如果不能继续给指定数量的slave发送数据，而且slave超过10秒没有给自己ack消息，那么就直接拒绝客户端的写请求</p><p>这样脑裂后的旧master就不会接受client的新数据，也就避免了数据丢失</p><p>上面的配置就确保了，如果跟任何一个slave丢了连接，在10秒后发现没有slave给自己ack，那么就拒绝新的写请求</p><p>因此在脑裂场景下，最多就丢失10秒的数据</p>]]></content>
       
       
       <categories>
@@ -157,31 +157,6 @@
     
     <entry>
       <title>个人总结</title>
-      <link href="/2020/04/29/%E6%80%BB%E7%BB%93/%E5%B7%A5%E4%BD%9C%E6%80%BB%E7%BB%93-20200430/"/>
-      <url>/2020/04/29/%E6%80%BB%E7%BB%93/%E5%B7%A5%E4%BD%9C%E6%80%BB%E7%BB%93-20200430/</url>
-      
-        <content type="html"><![CDATA[<h2 id="工作总结："><a href="#工作总结：" class="headerlink" title="工作总结：    "></a>工作总结：    </h2><p>五一活动上线完成，测试bug偏多，上线sql有问题。测试bug整体回顾中，发现小的需求遗漏较多。可能和自己心态有关，暂未发现良好的改进方向。可以考虑换个方式做整体设计，尤其是需求分析这块，要把所有的细节点都梳理到。</p><h2 id="工作反思："><a href="#工作反思：" class="headerlink" title="工作反思："></a>工作反思：</h2><h2 id="工作改进："><a href="#工作改进：" class="headerlink" title="工作改进："></a>工作改进：</h2><p>1.上线的sql文件中，所有的update语句和delete语句都删除掉！<br>2.验证上线文档文档的方式，就是把sql文件放到内网执行一遍，而不是直接看上线文档的sql。</p>]]></content>
-      
-      
-      <categories>
-          
-          <category> 总结 </category>
-          
-      </categories>
-      
-      
-        <tags>
-            
-            <tag> 工作总结 </tag>
-            
-        </tags>
-      
-    </entry>
-    
-    
-    
-    <entry>
-      <title>个人总结</title>
       <link href="/2020/04/29/%E6%80%BB%E7%BB%93/%E6%80%BB%E7%BB%93-2020/"/>
       <url>/2020/04/29/%E6%80%BB%E7%BB%93/%E6%80%BB%E7%BB%93-2020/</url>
       
@@ -198,6 +173,31 @@
         <tags>
             
             <tag> 生活总结 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>个人总结</title>
+      <link href="/2020/04/29/%E6%80%BB%E7%BB%93/%E5%B7%A5%E4%BD%9C%E6%80%BB%E7%BB%93-20200430/"/>
+      <url>/2020/04/29/%E6%80%BB%E7%BB%93/%E5%B7%A5%E4%BD%9C%E6%80%BB%E7%BB%93-20200430/</url>
+      
+        <content type="html"><![CDATA[<h2 id="工作总结："><a href="#工作总结：" class="headerlink" title="工作总结：    "></a>工作总结：    </h2><p>五一活动上线完成，测试bug偏多，上线sql有问题。测试bug整体回顾中，发现小的需求遗漏较多。可能和自己心态有关，暂未发现良好的改进方向。可以考虑换个方式做整体设计，尤其是需求分析这块，要把所有的细节点都梳理到。</p><h2 id="工作反思："><a href="#工作反思：" class="headerlink" title="工作反思："></a>工作反思：</h2><h2 id="工作改进："><a href="#工作改进：" class="headerlink" title="工作改进："></a>工作改进：</h2><p>1.上线的sql文件中，所有的update语句和delete语句都删除掉！<br>2.验证上线文档文档的方式，就是把sql文件放到内网执行一遍，而不是直接看上线文档的sql。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 总结 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 工作总结 </tag>
             
         </tags>
       
