@@ -4,6 +4,133 @@
   
     
     <entry>
+      <title>Redis雪崩和穿透</title>
+      <link href="/2020/05/02/%E5%AD%A6%E4%B9%A0/Redis%E9%9B%AA%E5%B4%A9%E5%92%8C%E7%A9%BF%E9%80%8F/"/>
+      <url>/2020/05/02/%E5%AD%A6%E4%B9%A0/Redis%E9%9B%AA%E5%B4%A9%E5%92%8C%E7%A9%BF%E9%80%8F/</url>
+      
+        <content type="html"><![CDATA[<h2 id="1-Redis雪崩的处理方案。发生前、发生中、发生后。"><a href="#1-Redis雪崩的处理方案。发生前、发生中、发生后。" class="headerlink" title="1.Redis雪崩的处理方案。发生前、发生中、发生后。"></a>1.Redis雪崩的处理方案。发生前、发生中、发生后。</h2><p>发生现象，大流量超过Redis负载，Redis宕机</p><p>发生前，保证Redis集群的高可用，主从+哨兵机制，避免Redis全量崩盘</p><p>发生中，限流和降级，保证数据库不挂掉</p><p>发生后，通过redis持久化的数据，重启Redis，快速恢复数据</p><h2 id="2-缓存穿透"><a href="#2-缓存穿透" class="headerlink" title="2.缓存穿透"></a>2.缓存穿透</h2><p>缓存空数据</p><p>布隆过滤器</p><h2 id="3-热点缓存"><a href="#3-热点缓存" class="headerlink" title="3.热点缓存"></a>3.热点缓存</h2><p>如何发现热缓存？</p><p>热缓存的处理方案？</p><p>1.引入本地缓存机制。ehcache或hashMap，直接先从本地查询到了，就不用查询Redis缓存了。</p><p>2.备份热key，不要让key都走到一组Redis上，在多组Redis中都存放一份。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> Redis </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Redis </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>G1收集器详解</title>
+      <link href="/2020/04/29/%E5%AD%A6%E4%B9%A0/G1/"/>
+      <url>/2020/04/29/%E5%AD%A6%E4%B9%A0/G1/</url>
+      
+        <content type="html"><![CDATA[<p>G1垃圾收集器，取消了堆中年轻代和老年代的物理划分，但仍属于分代收集器。G1算法将堆划分为若干个Region区域。其中一部分作用于年轻代，一部分作用于老年代，还有一种专门用于存储大对象的分区。</p><p>几个概念</p><p>三色标记算法，白灰黑。白：对象没有被标记到，标记阶段结束，会被当做垃圾回收掉。灰：对象被标记了，但是它的filed还没有被标记完。黑:对象都别标记了，且它的filed也被标记完了。</p><p>新生代采用复制算法，并行进行收集，收集过程会STW</p><p>老年代回收时同时也会触发年轻代的回收，回收主要分为4个阶段：</p><p>1.初始标记（initial remark  STW）。它标记了从GC Root开始直接可达的对象</p><p>2.并发标记（concurrent mark）。这个标记阶段从GC Root开始对heap中的对象进行标记，标记线程和用户线程并发执行，并且收集各个Region的存活对象信息。</p><p>3.最终标记（remark STW）。标记那些在并发阶段发生变化的对象</p><p>4.复制/清除。（cleanup STW），这个阶段会优先对可回收空间较大的Region进行回收，即为Garbage first</p><p>G1采用的是每次只清理一部分而不是全部的Region的增量式清理，由此来保证每次GC停顿时间不会太长。</p><p>总结如下，G1是逻辑分代不是物理分代，需要知道回收的过程和停顿的阶段。此外还需要知道，G1算法允许通过JVM参数来设置Region大小，范围是1-32M（2的幂次），可以设置期望的最大停顿时间等</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> java </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> jvm </tag>
+            
+            <tag> 垃圾收集器 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>JVM</title>
+      <link href="/2020/04/29/%E5%AD%A6%E4%B9%A0/java/"/>
+      <url>/2020/04/29/%E5%AD%A6%E4%B9%A0/java/</url>
+      
+        <content type="html"><![CDATA[<h2 id="1-jvm内存模型"><a href="#1-jvm内存模型" class="headerlink" title="1.jvm内存模型"></a>1.jvm内存模型</h2><h2 id="2-GC流程"><a href="#2-GC流程" class="headerlink" title="2.GC流程"></a>2.GC流程</h2><p>新生代创建对象，新生代区域不够的时候，会触发YGC,此时新生代会触发GC，对象进行清理。根据可达性算法对新生代空间的对象进行标记，通过复制算法进行新生代的对象回收。在多YGC过后，对象经过多次YGC后，然后就可以进行进行对象晋升，把该对象晋升到老年代。多次YGC之后，对象晋升老年代时候发现老年代的内存空间不足，会对老年代进行GC，通过</p><h2 id="3-常见的垃圾回收器"><a href="#3-常见的垃圾回收器" class="headerlink" title="3.常见的垃圾回收器"></a>3.常见的垃圾回收器</h2><p>CMS</p><p>ZGC</p><h2 id="4-G1收集器详解"><a href="#4-G1收集器详解" class="headerlink" title="4.G1收集器详解"></a>4.G1收集器详解</h2><p>G1垃圾收集器，取消了堆中年轻代和老年代的物理划分，但仍属于分代收集器。G1算法将堆划分为若干个Region区域。其中一部分作用于年轻代，一部分作用于老年代，还有一种专门用于存储大对象的分区。</p><p>几个概念</p><p>三色标记算法，白灰黑。白：对象没有被标记到，标记阶段结束，会被当做垃圾回收掉。灰：对象被标记了，但是它的filed还没有被标记完。黑:对象都别标记了，且它的filed也被标记完了。</p><p>新生代采用复制算法，并行进行收集，收集过程会STW</p><p>老年代回收时同时也会触发年轻代的回收，回收主要分为4个阶段：</p><p>1.初始标记（initial remark  STW）。它标记了从GC Root开始直接可达的对象</p><p>2.并发标记（concurrent mark）。这个标记阶段从GC Root开始对heap中的对象进行标记，标记线程和用户线程并发执行，并且收集各个Region的存活对象信息。</p><p>3.最终标记（remark STW）。标记那些在并发阶段发生变化的对象</p><p>4.复制/清除。（cleanup STW），这个阶段会优先对可回收空间较大的Region进行回收，即为Garbage first</p><p>G1采用的是每次只清理一部分而不是全部的Region的增量式清理，由此来保证每次GC停顿时间不会太长。</p><p>总结如下，G1是逻辑分代不是物理分代，需要知道回收的过程和停顿的阶段。此外还需要知道，G1算法允许通过JVM参数来设置Region大小，范围是1-32M（2的幂次），可以设置期望的最大停顿时间等</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> java </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> jvm </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>JVM</title>
+      <link href="/2020/04/29/%E5%AD%A6%E4%B9%A0/java%20-%20%E5%89%AF%E6%9C%AC/"/>
+      <url>/2020/04/29/%E5%AD%A6%E4%B9%A0/java%20-%20%E5%89%AF%E6%9C%AC/</url>
+      
+        <content type="html"><![CDATA[<h2 id="1-jvm内存模型"><a href="#1-jvm内存模型" class="headerlink" title="1.jvm内存模型"></a>1.jvm内存模型</h2><h2 id="2-GC流程"><a href="#2-GC流程" class="headerlink" title="2.GC流程"></a>2.GC流程</h2><p>新生代创建对象，新生代区域不够的时候，会触发YGC,此时新生代会触发GC，对象进行清理。根据可达性算法对新生代空间的对象进行标记，通过复制算法进行新生代的对象回收。在多YGC过后，对象经过多次YGC后，然后就可以进行进行对象晋升，把该对象晋升到老年代。多次YGC之后，对象晋升老年代时候发现老年代的内存空间不足，会对老年代进行GC，通过</p><h2 id="3-常见的垃圾回收器"><a href="#3-常见的垃圾回收器" class="headerlink" title="3.常见的垃圾回收器"></a>3.常见的垃圾回收器</h2><p>CMS</p><p>ZGC</p><h2 id="4-G1收集器详解"><a href="#4-G1收集器详解" class="headerlink" title="4.G1收集器详解"></a>4.G1收集器详解</h2><p>G1垃圾收集器，取消了堆中年轻代和老年代的物理划分，但仍属于分代收集器。G1算法将堆划分为若干个Region区域。其中一部分作用于年轻代，一部分作用于老年代，还有一种专门用于存储大对象的分区。</p><p>几个概念</p><p>三色标记算法，白灰黑。白：对象没有被标记到，标记阶段结束，会被当做垃圾回收掉。灰：对象被标记了，但是它的filed还没有被标记完。黑:对象都别标记了，且它的filed也被标记完了。</p><p>新生代采用复制算法，并行进行收集，收集过程会STW</p><p>老年代回收时同时也会触发年轻代的回收，回收主要分为4个阶段：</p><p>1.初始标记（initial remark  STW）。它标记了从GC Root开始直接可达的对象</p><p>2.并发标记（concurrent mark）。这个标记阶段从GC Root开始对heap中的对象进行标记，标记线程和用户线程并发执行，并且收集各个Region的存活对象信息。</p><p>3.最终标记（remark STW）。标记那些在并发阶段发生变化的对象</p><p>4.复制/清除。（cleanup STW），这个阶段会优先对可回收空间较大的Region进行回收，即为Garbage first</p><p>G1采用的是每次只清理一部分而不是全部的Region的增量式清理，由此来保证每次GC停顿时间不会太长。</p><p>总结如下，G1是逻辑分代不是物理分代，需要知道回收的过程和停顿的阶段。此外还需要知道，G1算法允许通过JVM参数来设置Region大小，范围是1-32M（2的幂次），可以设置期望的最大停顿时间等</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> java </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> jvm </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>Redis的高并发和高可用</title>
+      <link href="/2020/04/29/%E5%AD%A6%E4%B9%A0/redis%E9%AB%98%E5%B9%B6%E5%8F%91%E5%92%8C%E9%AB%98%E5%8F%AF%E7%94%A8/"/>
+      <url>/2020/04/29/%E5%AD%A6%E4%B9%A0/redis%E9%AB%98%E5%B9%B6%E5%8F%91%E5%92%8C%E9%AB%98%E5%8F%AF%E7%94%A8/</url>
+      
+        <content type="html"><![CDATA[<p>1.Redis的高并发和高可用的原理</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> Redis </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> Redis </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>个人总结</title>
       <link href="/2020/04/29/%E6%80%BB%E7%BB%93/%E5%B7%A5%E4%BD%9C%E6%80%BB%E7%BB%93-20200430/"/>
       <url>/2020/04/29/%E6%80%BB%E7%BB%93/%E5%B7%A5%E4%BD%9C%E6%80%BB%E7%BB%93-20200430/</url>
