@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="jvm,垃圾收集器," />
+  <meta name="keywords" content="Hexo, NexT" />
 
 
 
@@ -79,17 +79,13 @@
 
 
 
-<meta name="description" content="G1垃圾收集器，取消了堆中年轻代和老年代的物理划分，但仍属于分代收集器。G1算法将堆划分为若干个Region区域。其中一部分作用于年轻代，一部分作用于老年代，还有一种专门用于存储大对象的分区。 几个概念 三色标记算法，白灰黑。白：对象没有被标记到，标记阶段结束，会被当做垃圾回收掉。灰：对象被标记了，但是它的filed还没有被标记完。黑:对象都别标记了，且它的filed也被标记完了。 新生代采用复制">
-<meta property="og:type" content="article">
-<meta property="og:title" content="G1收集器详解">
-<meta property="og:url" content="http://yoursite.com/2020/04/29/%E5%AD%A6%E4%B9%A0/G1/index.html">
+<meta name="description" content="Go Go 加油">
+<meta property="og:type" content="website">
+<meta property="og:title" content="bai">
+<meta property="og:url" content="http://yoursite.com/archives/2020/page/2/index.html">
 <meta property="og:site_name" content="bai">
-<meta property="og:description" content="G1垃圾收集器，取消了堆中年轻代和老年代的物理划分，但仍属于分代收集器。G1算法将堆划分为若干个Region区域。其中一部分作用于年轻代，一部分作用于老年代，还有一种专门用于存储大对象的分区。 几个概念 三色标记算法，白灰黑。白：对象没有被标记到，标记阶段结束，会被当做垃圾回收掉。灰：对象被标记了，但是它的filed还没有被标记完。黑:对象都别标记了，且它的filed也被标记完了。 新生代采用复制">
-<meta property="article:published_time" content="2020-04-29T10:26:11.000Z">
-<meta property="article:modified_time" content="2020-05-01T05:00:58.235Z">
+<meta property="og:description" content="Go Go 加油">
 <meta property="article:author" content="bai">
-<meta property="article:tag" content="jvm">
-<meta property="article:tag" content="垃圾收集器">
 <meta name="twitter:card" content="summary">
 
 
@@ -120,13 +116,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2020/04/29/学习/G1/"/>
+  <link rel="canonical" href="http://yoursite.com/archives/2020/page/2/"/>
 
 
 
 
 
-  <title>G1收集器详解 | bai</title>
+  <title>归档 | bai</title>
   
 
 
@@ -145,7 +141,7 @@
     
   
 
-  <div class="container sidebar-position-left page-post-detail">
+  <div class="container sidebar-position-left page-archive">
     <div class="headband"></div>
 
     <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
@@ -273,185 +269,226 @@
           <div id="content" class="content">
             
 
-  <div id="posts" class="posts-expand">
-    
+  
+  
+  
+  <div class="post-block archive">
+    <div id="posts" class="posts-collapse">
+      <span class="archive-move-on"></span>
 
-  
+      <span class="archive-page-counter">
+        
+        
+        
+          
+        
+        嗯..! 目前共计 15 篇日志。 继续努力。
+      </span>
 
-  
-  
-  
+      
+
+        
+        
+        
+
+        
+          
+          <div class="collection-title">
+            <h1 class="archive-year" id="archive-year-2020">2020</h1>
+          </div>
+        
+        
+
+        
 
   <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
-  
-  
-  
-  <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/04/29/%E5%AD%A6%E4%B9%A0/G1/">
+    <header class="post-header">
 
-    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
-      <meta itemprop="name" content="bai">
-      <meta itemprop="description" content="">
-      <meta itemprop="image" content="/images/avatar.jpg">
-    </span>
-
-    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="bai">
-    </span>
-
-    
-      <header class="post-header">
-
+      <h2 class="post-title">
         
+            <a class="post-title-link" href="/2020/04/29/%E5%AD%A6%E4%B9%A0/G1/" itemprop="url">
+              
+                <span itemprop="name">G1收集器详解</span>
+              
+            </a>
         
-          <h1 class="post-title" itemprop="name headline">G1收集器详解</h1>
-        
+      </h2>
 
-        <div class="post-meta">
-          <span class="post-time">
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-calendar-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">发表于</span>
-              
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-04-29T18:26:11+08:00">
-                2020-04-29
-              </time>
-            
+      <div class="post-meta">
+        <time class="post-time" itemprop="dateCreated"
+              datetime="2020-04-29T18:26:11+08:00"
+              content="2020-04-29" >
+          04-29
+        </time>
+      </div>
 
-            
-
-            
-          </span>
-
-          
-            <span class="post-category" >
-            
-              <span class="post-meta-divider">|</span>
-            
-              <span class="post-meta-item-icon">
-                <i class="fa fa-folder-o"></i>
-              </span>
-              
-                <span class="post-meta-item-text">分类于</span>
-              
-              
-                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/java/" itemprop="url" rel="index">
-                    <span itemprop="name">java</span>
-                  </a>
-                </span>
-
-                
-                
-              
-            </span>
-          
-
-          
-            
-          
-
-          
-          
-
-          
-
-          
-
-          
-
-        </div>
-      </header>
-    
-
-    
-    
-    
-    <div class="post-body" itemprop="articleBody">
-
-      
-      
-
-      
-        <p>G1垃圾收集器，取消了堆中年轻代和老年代的物理划分，但仍属于分代收集器。G1算法将堆划分为若干个Region区域。其中一部分作用于年轻代，一部分作用于老年代，还有一种专门用于存储大对象的分区。</p>
-<p>几个概念</p>
-<p>三色标记算法，白灰黑。白：对象没有被标记到，标记阶段结束，会被当做垃圾回收掉。灰：对象被标记了，但是它的filed还没有被标记完。黑:对象都别标记了，且它的filed也被标记完了。</p>
-<p>新生代采用复制算法，并行进行收集，收集过程会STW</p>
-<p>老年代回收时同时也会触发年轻代的回收，回收主要分为4个阶段：</p>
-<p>1.初始标记（initial remark  STW）。它标记了从GC Root开始直接可达的对象</p>
-<p>2.并发标记（concurrent mark）。这个标记阶段从GC Root开始对heap中的对象进行标记，标记线程和用户线程并发执行，并且收集各个Region的存活对象信息。</p>
-<p>3.最终标记（remark STW）。标记那些在并发阶段发生变化的对象</p>
-<p>4.复制/清除。（cleanup STW），这个阶段会优先对可回收空间较大的Region进行回收，即为Garbage first</p>
-<p>G1采用的是每次只清理一部分而不是全部的Region的增量式清理，由此来保证每次GC停顿时间不会太长。</p>
-<p>总结如下，G1是逻辑分代不是物理分代，需要知道回收的过程和停顿的阶段。此外还需要知道，G1算法允许通过JVM参数来设置Region大小，范围是1-32M（2的幂次），可以设置期望的最大停顿时间等</p>
-
-      
-    </div>
-    
-    
-    
-
-    
-
-    
-
-    
-
-    <footer class="post-footer">
-      
-        <div class="post-tags">
-          
-            <a href="/tags/jvm/" rel="tag"># jvm</a>
-          
-            <a href="/tags/%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8/" rel="tag"># 垃圾收集器</a>
-          
-        </div>
-      
-
-      
-      
-      
-
-      
-        <div class="post-nav">
-          <div class="post-nav-next post-nav-item">
-            
-              <a href="/2020/04/29/%E5%AD%A6%E4%B9%A0/java%20-%20%E5%89%AF%E6%9C%AC/" rel="next" title="JVM">
-                <i class="fa fa-chevron-left"></i> JVM
-              </a>
-            
-          </div>
-
-          <span class="post-nav-divider"></span>
-
-          <div class="post-nav-prev post-nav-item">
-            
-              <a href="/2020/05/02/%E5%AD%A6%E4%B9%A0/Redis%E9%9B%AA%E5%B4%A9%E5%92%8C%E7%A9%BF%E9%80%8F/" rel="prev" title="Redis雪崩和穿透">
-                Redis雪崩和穿透 <i class="fa fa-chevron-right"></i>
-              </a>
-            
-          </div>
-        </div>
-      
-
-      
-      
-    </footer>
-  </div>
-  
-  
-  
+    </header>
   </article>
 
 
 
-    <div class="post-spread">
       
+
+        
+        
+        
+
+        
+        
+
+        
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+    <header class="post-header">
+
+      <h2 class="post-title">
+        
+            <a class="post-title-link" href="/2020/04/29/%E5%AD%A6%E4%B9%A0/java%20-%20%E5%89%AF%E6%9C%AC/" itemprop="url">
+              
+                <span itemprop="name">JVM</span>
+              
+            </a>
+        
+      </h2>
+
+      <div class="post-meta">
+        <time class="post-time" itemprop="dateCreated"
+              datetime="2020-04-29T18:26:11+08:00"
+              content="2020-04-29" >
+          04-29
+        </time>
+      </div>
+
+    </header>
+  </article>
+
+
+
+      
+
+        
+        
+        
+
+        
+        
+
+        
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+    <header class="post-header">
+
+      <h2 class="post-title">
+        
+            <a class="post-title-link" href="/2020/04/29/%E5%AD%A6%E4%B9%A0/java/" itemprop="url">
+              
+                <span itemprop="name">JVM</span>
+              
+            </a>
+        
+      </h2>
+
+      <div class="post-meta">
+        <time class="post-time" itemprop="dateCreated"
+              datetime="2020-04-29T18:26:11+08:00"
+              content="2020-04-29" >
+          04-29
+        </time>
+      </div>
+
+    </header>
+  </article>
+
+
+
+      
+
+        
+        
+        
+
+        
+        
+
+        
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+    <header class="post-header">
+
+      <h2 class="post-title">
+        
+            <a class="post-title-link" href="/2020/04/29/%E6%80%BB%E7%BB%93/%E5%B7%A5%E4%BD%9C%E6%80%BB%E7%BB%93-20200430/" itemprop="url">
+              
+                <span itemprop="name">个人总结</span>
+              
+            </a>
+        
+      </h2>
+
+      <div class="post-meta">
+        <time class="post-time" itemprop="dateCreated"
+              datetime="2020-04-29T18:26:11+08:00"
+              content="2020-04-29" >
+          04-29
+        </time>
+      </div>
+
+    </header>
+  </article>
+
+
+
+      
+
+        
+        
+        
+
+        
+        
+
+        
+
+  <article class="post post-type-normal" itemscope itemtype="http://schema.org/Article">
+    <header class="post-header">
+
+      <h2 class="post-title">
+        
+            <a class="post-title-link" href="/2020/04/29/%E6%80%BB%E7%BB%93/%E6%80%BB%E7%BB%93-2020/" itemprop="url">
+              
+                <span itemprop="name">个人总结</span>
+              
+            </a>
+        
+      </h2>
+
+      <div class="post-meta">
+        <time class="post-time" itemprop="dateCreated"
+              datetime="2020-04-29T18:26:11+08:00"
+              content="2020-04-29" >
+          04-29
+        </time>
+      </div>
+
+    </header>
+  </article>
+
+
+
+      
+
     </div>
   </div>
+  
+  
+  
+
+  
+  <nav class="pagination">
+    <a class="extend prev" rel="prev" href="/archives/2020/">&lt;i class&#x3D;&quot;fa fa-angle-left&quot;&gt;&lt;&#x2F;i&gt;</a><a class="page-number" href="/archives/2020/">1</a><span class="page-number current">2</span>
+  </nav>
+
+
 
 
           </div>
@@ -459,10 +496,6 @@
 
 
           
-
-  
-
-
 
         </div>
         
@@ -688,10 +721,6 @@
 
 
   
-  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.4"></script>
-<script type="text/javascript" src="/js/src/post-details.js?v=5.1.4"></script>
-
-
 
   
 

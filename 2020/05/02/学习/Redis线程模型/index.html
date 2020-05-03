@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="jvm,垃圾收集器," />
+  <meta name="keywords" content="Redis," />
 
 
 
@@ -79,17 +79,16 @@
 
 
 
-<meta name="description" content="G1垃圾收集器，取消了堆中年轻代和老年代的物理划分，但仍属于分代收集器。G1算法将堆划分为若干个Region区域。其中一部分作用于年轻代，一部分作用于老年代，还有一种专门用于存储大对象的分区。 几个概念 三色标记算法，白灰黑。白：对象没有被标记到，标记阶段结束，会被当做垃圾回收掉。灰：对象被标记了，但是它的filed还没有被标记完。黑:对象都别标记了，且它的filed也被标记完了。 新生代采用复制">
+<meta name="description" content="文件事件处理器由socket、IO多路复用程序、文件事件分派器、事件处理器4个组件构成。 当客户端连接到服务端，服务端就为客户端创建一个socket的AE_REABLE事件，通过IO多路复用程序，放到队列中，有一个时间分派器组件去处理socket的事件请求，由请求连接处理器，命令执行处理器，命令回复处理器去分别执行对象的请求。其中命令执行处理器，执行完成后，会将返回值和该socket的命令回复处理">
 <meta property="og:type" content="article">
-<meta property="og:title" content="G1收集器详解">
-<meta property="og:url" content="http://yoursite.com/2020/04/29/%E5%AD%A6%E4%B9%A0/G1/index.html">
+<meta property="og:title" content="Redis线程模型">
+<meta property="og:url" content="http://yoursite.com/2020/05/02/%E5%AD%A6%E4%B9%A0/Redis%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B/index.html">
 <meta property="og:site_name" content="bai">
-<meta property="og:description" content="G1垃圾收集器，取消了堆中年轻代和老年代的物理划分，但仍属于分代收集器。G1算法将堆划分为若干个Region区域。其中一部分作用于年轻代，一部分作用于老年代，还有一种专门用于存储大对象的分区。 几个概念 三色标记算法，白灰黑。白：对象没有被标记到，标记阶段结束，会被当做垃圾回收掉。灰：对象被标记了，但是它的filed还没有被标记完。黑:对象都别标记了，且它的filed也被标记完了。 新生代采用复制">
-<meta property="article:published_time" content="2020-04-29T10:26:11.000Z">
-<meta property="article:modified_time" content="2020-05-01T05:00:58.235Z">
+<meta property="og:description" content="文件事件处理器由socket、IO多路复用程序、文件事件分派器、事件处理器4个组件构成。 当客户端连接到服务端，服务端就为客户端创建一个socket的AE_REABLE事件，通过IO多路复用程序，放到队列中，有一个时间分派器组件去处理socket的事件请求，由请求连接处理器，命令执行处理器，命令回复处理器去分别执行对象的请求。其中命令执行处理器，执行完成后，会将返回值和该socket的命令回复处理">
+<meta property="article:published_time" content="2020-05-02T06:21:49.000Z">
+<meta property="article:modified_time" content="2020-05-03T06:04:47.632Z">
 <meta property="article:author" content="bai">
-<meta property="article:tag" content="jvm">
-<meta property="article:tag" content="垃圾收集器">
+<meta property="article:tag" content="Redis">
 <meta name="twitter:card" content="summary">
 
 
@@ -120,13 +119,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2020/04/29/学习/G1/"/>
+  <link rel="canonical" href="http://yoursite.com/2020/05/02/学习/Redis线程模型/"/>
 
 
 
 
 
-  <title>G1收集器详解 | bai</title>
+  <title>Redis线程模型 | bai</title>
   
 
 
@@ -287,7 +286,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/04/29/%E5%AD%A6%E4%B9%A0/G1/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/05/02/%E5%AD%A6%E4%B9%A0/Redis%E7%BA%BF%E7%A8%8B%E6%A8%A1%E5%9E%8B/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="bai">
@@ -304,7 +303,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">G1收集器详解</h1>
+          <h1 class="post-title" itemprop="name headline">Redis线程模型</h1>
         
 
         <div class="post-meta">
@@ -316,8 +315,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-04-29T18:26:11+08:00">
-                2020-04-29
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-05-02T14:21:49+08:00">
+                2020-05-02
               </time>
             
 
@@ -339,8 +338,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/java/" itemprop="url" rel="index">
-                    <span itemprop="name">java</span>
+                  <a href="/categories/Redis/" itemprop="url" rel="index">
+                    <span itemprop="name">Redis</span>
                   </a>
                 </span>
 
@@ -376,17 +375,8 @@
       
 
       
-        <p>G1垃圾收集器，取消了堆中年轻代和老年代的物理划分，但仍属于分代收集器。G1算法将堆划分为若干个Region区域。其中一部分作用于年轻代，一部分作用于老年代，还有一种专门用于存储大对象的分区。</p>
-<p>几个概念</p>
-<p>三色标记算法，白灰黑。白：对象没有被标记到，标记阶段结束，会被当做垃圾回收掉。灰：对象被标记了，但是它的filed还没有被标记完。黑:对象都别标记了，且它的filed也被标记完了。</p>
-<p>新生代采用复制算法，并行进行收集，收集过程会STW</p>
-<p>老年代回收时同时也会触发年轻代的回收，回收主要分为4个阶段：</p>
-<p>1.初始标记（initial remark  STW）。它标记了从GC Root开始直接可达的对象</p>
-<p>2.并发标记（concurrent mark）。这个标记阶段从GC Root开始对heap中的对象进行标记，标记线程和用户线程并发执行，并且收集各个Region的存活对象信息。</p>
-<p>3.最终标记（remark STW）。标记那些在并发阶段发生变化的对象</p>
-<p>4.复制/清除。（cleanup STW），这个阶段会优先对可回收空间较大的Region进行回收，即为Garbage first</p>
-<p>G1采用的是每次只清理一部分而不是全部的Region的增量式清理，由此来保证每次GC停顿时间不会太长。</p>
-<p>总结如下，G1是逻辑分代不是物理分代，需要知道回收的过程和停顿的阶段。此外还需要知道，G1算法允许通过JVM参数来设置Region大小，范围是1-32M（2的幂次），可以设置期望的最大停顿时间等</p>
+        <p>文件事件处理器由socket、IO多路复用程序、文件事件分派器、事件处理器4个组件构成。</p>
+<p>当客户端连接到服务端，服务端就为客户端创建一个socket的AE_REABLE事件，通过IO多路复用程序，放到队列中，有一个时间分派器组件去处理socket的事件请求，由请求连接处理器，命令执行处理器，命令回复处理器去分别执行对象的请求。其中命令执行处理器，执行完成后，会将返回值和该socket的命令回复处理器相关联，在之后socket的AE_WRITEABLE事件产生后，去获取到该消息的返回。</p>
 
       
     </div>
@@ -404,9 +394,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/jvm/" rel="tag"># jvm</a>
-          
-            <a href="/tags/%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8/" rel="tag"># 垃圾收集器</a>
+            <a href="/tags/Redis/" rel="tag"># Redis</a>
           
         </div>
       
@@ -419,8 +407,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2020/04/29/%E5%AD%A6%E4%B9%A0/java%20-%20%E5%89%AF%E6%9C%AC/" rel="next" title="JVM">
-                <i class="fa fa-chevron-left"></i> JVM
+              <a href="/2020/05/02/%E5%AD%A6%E4%B9%A0/redis%E9%AB%98%E5%B9%B6%E5%8F%91%E5%92%8C%E9%AB%98%E5%8F%AF%E7%94%A8/" rel="next" title="Redis的高并发和高可用">
+                <i class="fa fa-chevron-left"></i> Redis的高并发和高可用
               </a>
             
           </div>
@@ -429,8 +417,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2020/05/02/%E5%AD%A6%E4%B9%A0/Redis%E9%9B%AA%E5%B4%A9%E5%92%8C%E7%A9%BF%E9%80%8F/" rel="prev" title="Redis雪崩和穿透">
-                Redis雪崩和穿透 <i class="fa fa-chevron-right"></i>
+              <a href="/2020/05/03/%E5%AD%A6%E4%B9%A0/%E6%B6%88%E6%81%AF%E9%98%9F%E5%88%97%E7%9A%84%E9%80%89%E5%9E%8B/" rel="prev" title="mq的技术选型">
+                mq的技术选型 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>

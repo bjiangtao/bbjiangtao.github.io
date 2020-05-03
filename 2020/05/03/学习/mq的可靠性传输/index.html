@@ -68,7 +68,7 @@
 
 
 
-  <meta name="keywords" content="jvm,垃圾收集器," />
+  <meta name="keywords" content="mq," />
 
 
 
@@ -79,17 +79,16 @@
 
 
 
-<meta name="description" content="G1垃圾收集器，取消了堆中年轻代和老年代的物理划分，但仍属于分代收集器。G1算法将堆划分为若干个Region区域。其中一部分作用于年轻代，一部分作用于老年代，还有一种专门用于存储大对象的分区。 几个概念 三色标记算法，白灰黑。白：对象没有被标记到，标记阶段结束，会被当做垃圾回收掉。灰：对象被标记了，但是它的filed还没有被标记完。黑:对象都别标记了，且它的filed也被标记完了。 新生代采用复制">
+<meta name="description" content="rabbitmq可能存在的丢失的数据问题往队列里面发消息保证不丢的2中方案事务提交消息模式 confirm 回调机制 mq丢失设置队列持久化 消费者消息丢失取消autoAck机制，由程序执行完毕再进行ACK kafka可能丢消息的处理场景消费者消息丢失取消autoACK机制，由程序手动ACK 队列本身丢失topic的replication的数量 大于1个 服务端设置最小follower 保持联系的">
 <meta property="og:type" content="article">
-<meta property="og:title" content="G1收集器详解">
-<meta property="og:url" content="http://yoursite.com/2020/04/29/%E5%AD%A6%E4%B9%A0/G1/index.html">
+<meta property="og:title" content="mq的可靠性传输">
+<meta property="og:url" content="http://yoursite.com/2020/05/03/%E5%AD%A6%E4%B9%A0/mq%E7%9A%84%E5%8F%AF%E9%9D%A0%E6%80%A7%E4%BC%A0%E8%BE%93/index.html">
 <meta property="og:site_name" content="bai">
-<meta property="og:description" content="G1垃圾收集器，取消了堆中年轻代和老年代的物理划分，但仍属于分代收集器。G1算法将堆划分为若干个Region区域。其中一部分作用于年轻代，一部分作用于老年代，还有一种专门用于存储大对象的分区。 几个概念 三色标记算法，白灰黑。白：对象没有被标记到，标记阶段结束，会被当做垃圾回收掉。灰：对象被标记了，但是它的filed还没有被标记完。黑:对象都别标记了，且它的filed也被标记完了。 新生代采用复制">
-<meta property="article:published_time" content="2020-04-29T10:26:11.000Z">
-<meta property="article:modified_time" content="2020-05-01T05:00:58.235Z">
+<meta property="og:description" content="rabbitmq可能存在的丢失的数据问题往队列里面发消息保证不丢的2中方案事务提交消息模式 confirm 回调机制 mq丢失设置队列持久化 消费者消息丢失取消autoAck机制，由程序执行完毕再进行ACK kafka可能丢消息的处理场景消费者消息丢失取消autoACK机制，由程序手动ACK 队列本身丢失topic的replication的数量 大于1个 服务端设置最小follower 保持联系的">
+<meta property="article:published_time" content="2020-05-03T07:56:37.000Z">
+<meta property="article:modified_time" content="2020-05-03T15:23:23.874Z">
 <meta property="article:author" content="bai">
-<meta property="article:tag" content="jvm">
-<meta property="article:tag" content="垃圾收集器">
+<meta property="article:tag" content="mq">
 <meta name="twitter:card" content="summary">
 
 
@@ -120,13 +119,13 @@
 
 
 
-  <link rel="canonical" href="http://yoursite.com/2020/04/29/学习/G1/"/>
+  <link rel="canonical" href="http://yoursite.com/2020/05/03/学习/mq的可靠性传输/"/>
 
 
 
 
 
-  <title>G1收集器详解 | bai</title>
+  <title>mq的可靠性传输 | bai</title>
   
 
 
@@ -287,7 +286,7 @@
   
   
   <div class="post-block">
-    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/04/29/%E5%AD%A6%E4%B9%A0/G1/">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/05/03/%E5%AD%A6%E4%B9%A0/mq%E7%9A%84%E5%8F%AF%E9%9D%A0%E6%80%A7%E4%BC%A0%E8%BE%93/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="name" content="bai">
@@ -304,7 +303,7 @@
 
         
         
-          <h1 class="post-title" itemprop="name headline">G1收集器详解</h1>
+          <h1 class="post-title" itemprop="name headline">mq的可靠性传输</h1>
         
 
         <div class="post-meta">
@@ -316,8 +315,8 @@
               
                 <span class="post-meta-item-text">发表于</span>
               
-              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-04-29T18:26:11+08:00">
-                2020-04-29
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2020-05-03T15:56:37+08:00">
+                2020-05-03
               </time>
             
 
@@ -339,8 +338,8 @@
               
               
                 <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
-                  <a href="/categories/java/" itemprop="url" rel="index">
-                    <span itemprop="name">java</span>
+                  <a href="/categories/mq/" itemprop="url" rel="index">
+                    <span itemprop="name">mq</span>
                   </a>
                 </span>
 
@@ -376,17 +375,14 @@
       
 
       
-        <p>G1垃圾收集器，取消了堆中年轻代和老年代的物理划分，但仍属于分代收集器。G1算法将堆划分为若干个Region区域。其中一部分作用于年轻代，一部分作用于老年代，还有一种专门用于存储大对象的分区。</p>
-<p>几个概念</p>
-<p>三色标记算法，白灰黑。白：对象没有被标记到，标记阶段结束，会被当做垃圾回收掉。灰：对象被标记了，但是它的filed还没有被标记完。黑:对象都别标记了，且它的filed也被标记完了。</p>
-<p>新生代采用复制算法，并行进行收集，收集过程会STW</p>
-<p>老年代回收时同时也会触发年轻代的回收，回收主要分为4个阶段：</p>
-<p>1.初始标记（initial remark  STW）。它标记了从GC Root开始直接可达的对象</p>
-<p>2.并发标记（concurrent mark）。这个标记阶段从GC Root开始对heap中的对象进行标记，标记线程和用户线程并发执行，并且收集各个Region的存活对象信息。</p>
-<p>3.最终标记（remark STW）。标记那些在并发阶段发生变化的对象</p>
-<p>4.复制/清除。（cleanup STW），这个阶段会优先对可回收空间较大的Region进行回收，即为Garbage first</p>
-<p>G1采用的是每次只清理一部分而不是全部的Region的增量式清理，由此来保证每次GC停顿时间不会太长。</p>
-<p>总结如下，G1是逻辑分代不是物理分代，需要知道回收的过程和停顿的阶段。此外还需要知道，G1算法允许通过JVM参数来设置Region大小，范围是1-32M（2的幂次），可以设置期望的最大停顿时间等</p>
+        <h1 id="rabbitmq可能存在的丢失的数据问题"><a href="#rabbitmq可能存在的丢失的数据问题" class="headerlink" title="rabbitmq可能存在的丢失的数据问题"></a>rabbitmq可能存在的丢失的数据问题</h1><h2 id="往队列里面发消息保证不丢的2中方案"><a href="#往队列里面发消息保证不丢的2中方案" class="headerlink" title="往队列里面发消息保证不丢的2中方案"></a>往队列里面发消息保证不丢的2中方案</h2><p>事务提交消息模式</p>
+<p>confirm 回调机制</p>
+<h2 id="mq丢失"><a href="#mq丢失" class="headerlink" title="mq丢失"></a>mq丢失</h2><p>设置队列持久化</p>
+<h2 id="消费者消息丢失"><a href="#消费者消息丢失" class="headerlink" title="消费者消息丢失"></a>消费者消息丢失</h2><p>取消autoAck机制，由程序执行完毕再进行ACK</p>
+<h1 id="kafka可能丢消息的处理场景"><a href="#kafka可能丢消息的处理场景" class="headerlink" title="kafka可能丢消息的处理场景"></a>kafka可能丢消息的处理场景</h1><h2 id="消费者消息丢失-1"><a href="#消费者消息丢失-1" class="headerlink" title="消费者消息丢失"></a>消费者消息丢失</h2><p>取消autoACK机制，由程序手动ACK</p>
+<h2 id="队列本身丢失"><a href="#队列本身丢失" class="headerlink" title="队列本身丢失"></a>队列本身丢失</h2><p>topic的replication的数量 大于1个</p>
+<p>服务端设置最小follower 保持联系的参数，至少是1个</p>
+<p>producer端设置  retire 无限尝试、设置 ack 为全部follower确认</p>
 
       
     </div>
@@ -404,9 +400,7 @@
       
         <div class="post-tags">
           
-            <a href="/tags/jvm/" rel="tag"># jvm</a>
-          
-            <a href="/tags/%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8/" rel="tag"># 垃圾收集器</a>
+            <a href="/tags/mq/" rel="tag"># mq</a>
           
         </div>
       
@@ -419,8 +413,8 @@
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2020/04/29/%E5%AD%A6%E4%B9%A0/java%20-%20%E5%89%AF%E6%9C%AC/" rel="next" title="JVM">
-                <i class="fa fa-chevron-left"></i> JVM
+              <a href="/2020/05/03/%E5%AD%A6%E4%B9%A0/mq%E7%9A%84%E5%B9%82%E7%AD%89%E6%80%A7/" rel="next" title="mq的幂等性">
+                <i class="fa fa-chevron-left"></i> mq的幂等性
               </a>
             
           </div>
@@ -429,8 +423,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2020/05/02/%E5%AD%A6%E4%B9%A0/Redis%E9%9B%AA%E5%B4%A9%E5%92%8C%E7%A9%BF%E9%80%8F/" rel="prev" title="Redis雪崩和穿透">
-                Redis雪崩和穿透 <i class="fa fa-chevron-right"></i>
+              <a href="/2020/05/03/%E5%AD%A6%E4%B9%A0/mq%E7%9A%84%E9%A1%BA%E5%BA%8F%E6%80%A7/" rel="prev" title="mq的顺序性">
+                mq的顺序性 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -483,8 +477,17 @@
       
 
       
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap">
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview-wrap">
+            站点概览
+          </li>
+        </ul>
+      
 
-      <section class="site-overview-wrap sidebar-panel sidebar-panel-active">
+      <section class="site-overview-wrap sidebar-panel">
         <div class="site-overview">
           <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
             
@@ -548,6 +551,22 @@
         </div>
       </section>
 
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#rabbitmq可能存在的丢失的数据问题"><span class="nav-number">1.</span> <span class="nav-text">rabbitmq可能存在的丢失的数据问题</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#往队列里面发消息保证不丢的2中方案"><span class="nav-number">1.1.</span> <span class="nav-text">往队列里面发消息保证不丢的2中方案</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mq丢失"><span class="nav-number">1.2.</span> <span class="nav-text">mq丢失</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#消费者消息丢失"><span class="nav-number">1.3.</span> <span class="nav-text">消费者消息丢失</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#kafka可能丢消息的处理场景"><span class="nav-number">2.</span> <span class="nav-text">kafka可能丢消息的处理场景</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#消费者消息丢失-1"><span class="nav-number">2.1.</span> <span class="nav-text">消费者消息丢失</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#队列本身丢失"><span class="nav-number">2.2.</span> <span class="nav-text">队列本身丢失</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
       
 
       
