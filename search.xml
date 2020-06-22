@@ -4,33 +4,6 @@
   
     
     <entry>
-      <title>G1</title>
-      <link href="/2020/06/18/%E5%AD%A6%E4%B9%A0/G1%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%9F/"/>
-      <url>/2020/06/18/%E5%AD%A6%E4%B9%A0/G1%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%9F/</url>
-      
-        <content type="html"><![CDATA[<p>-XX:UserG1GC,默认指定G1垃圾回收器</p><p>默认Region 大小，堆空间/2048，可通过参数设定Region大小,‐XX:G1HeapRegionSize -&gt; 指定分区大小(1MB~32MB，且必须是2的幂)</p><p>新生代内存初始空间(默认整堆5%)，可通过‐XX:G1NewSizePercent 调整</p><p>系统运行过程中新生代会不断扩大，默认不找过60%，可通过‐XX:G1MaxNewSizePercent 调整</p><p>本身保留了Survivor和Eden的概念，新生代，通过复制算法来进行垃圾回收</p><p>因为GC可以设定目标GC停顿时间，‐XX:MaxGCPauseMillis  （默认200ms） </p><p>1.对象什么时候进入老年代呢？</p><pre><code>（1）对象在新生代躲过很多次垃圾回收，达到一定年龄了  （‐XX:MaxTenuringThreshold 来设定分代年龄）（2）动态年龄判断规则，如果一旦发生某次新生代GC过后，存活对象超过Survivor的50%此时就会判断下，比如年龄1、2、3、4岁的对象总大小已经超过了Survivor的50%，此时4岁以上的对象全部进入老年代，这就是动态年龄判断规则</code></pre><p>2.大对象Region</p><pre><code>分配策略：    G1是有专门的存放大对象的Region区域    判断规则：一个大对象超过了一个Region大小的50%，如果超过Region大小，会占用多个Region回收规则：    在进行新生代回收和老年代回收的时候也顺便带着大对象Region一起回收的</code></pre><p>3.什么时候触发新生代和老年代的混合回收？</p><pre><code>G1有一个参数：-XX:InitiatingHeapOccupancyPercent ，默认45%，如果老年代占据堆内存45%的Region的时候，此时就会尝试触发一个新生代和老年代一起回收的混合阶段</code></pre><p>4.G1垃圾回收过程</p><pre><code>（1）.初始标记   STW ，标记一个GC Roots直接能引用的对象     对各个线程栈内存中的局部变量代表的GC Roots,以及方法区中静态变量的GC Roots，进行扫描，标记出来他们直接引用的哪些对象（2）.并发标记           与应用程序并行运行，同时进行GC Roots追踪，从GC Roots开始追踪所有存活的对象        而且此阶段对对象做出的一些修改 记录起来，比如那个对象被新建了（new ），哪些对象失去了引用（线程栈执行结束）（3）.最终标记  STW，重新处理下哪些是存活对象，哪些是垃圾对象 (4). 混合回收（包含新生代、老年代、大对象）           这个阶段会计算老年代中每个Region中存活对象的数量，存活对象占比，还有执行垃圾回收的预期性能和效率，然后会停止应用程序，全力进行垃圾回收，此时选择部分Region进行回收，因此必须让垃圾回收的停顿时间控制在我们指定的范围内，比如老年代1000个Region都满了，回收800个Region正好满足200ms的停顿，那么此次回收就会回收800个Region，尽量将GC控制在可控范围内，此时回收的Region可能会是 从新生代、老年代、大对象中个字挑选一些Region来进行回收，尽量回收更多的垃圾         真正回收的时候会STW，流程是先STW，然后恢复，然后在STW，在恢复        ‐XX:G1MixedGCCountTarget  就是在混合阶段回收的构成中，执行几次混合回收（默认8次）‐XX:G1HeapWastePercent 默认5%，在混合回收过程中，对Region都是基于复制算法进行，都是把要回收的Region里的存活对象放入其它Region中，然后这个Region的垃圾对象全部清除掉。这种回收过程就会空出来Region，一旦空出来Region达到堆内存的5%，此时就会立刻停止垃圾回收，意味着本次混合回收结束G1都是基于复制算法进行Region的回收，就不会出现CMS的内存碎片‐XX:G1MixedGCLiveThresholdPercent 默认值85%，回收Region的时候，存活对象必须低于85%的Region才进行回收如果在进行Mixed回收的过程中，此时万一出现拷贝过程中没有空闲Region来承载自己的存活对象了，就会触发一次失败。一旦失败，立马就会切换为停止系统程序，然后采用单线程进行标志、清理、压缩整理，从而空闲出一批Region。当然这个阶段肯定极其慢的    </code></pre><p> young mixed</p>]]></content>
-      
-      
-      <categories>
-          
-          <category> JVM </category>
-          
-      </categories>
-      
-      
-        <tags>
-            
-            <tag> JVM </tag>
-            
-            <tag> G1 </tag>
-            
-        </tags>
-      
-    </entry>
-    
-    
-    
-    <entry>
       <title>JVM参数设置</title>
       <link href="/2020/06/18/%E5%AD%A6%E4%B9%A0/JVM%E5%8F%82%E6%95%B0%E8%AE%BE%E7%BD%AE/"/>
       <url>/2020/06/18/%E5%AD%A6%E4%B9%A0/JVM%E5%8F%82%E6%95%B0%E8%AE%BE%E7%BD%AE/</url>
@@ -50,6 +23,33 @@
             <tag> JVM </tag>
             
             <tag> 参数设置 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>G1</title>
+      <link href="/2020/06/18/%E5%AD%A6%E4%B9%A0/G1%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%9F/"/>
+      <url>/2020/06/18/%E5%AD%A6%E4%B9%A0/G1%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%9F/</url>
+      
+        <content type="html"><![CDATA[<p>-XX:UserG1GC,默认指定G1垃圾回收器</p><p>默认Region 大小，堆空间/2048，可通过参数设定Region大小,‐XX:G1HeapRegionSize -&gt; 指定分区大小(1MB~32MB，且必须是2的幂)</p><p>新生代内存初始空间(默认整堆5%)，可通过‐XX:G1NewSizePercent 调整</p><p>系统运行过程中新生代会不断扩大，默认不找过60%，可通过‐XX:G1MaxNewSizePercent 调整</p><p>本身保留了Survivor和Eden的概念，新生代，通过复制算法来进行垃圾回收</p><p>因为GC可以设定目标GC停顿时间，‐XX:MaxGCPauseMillis  （默认200ms） </p><p>1.对象什么时候进入老年代呢？</p><pre><code>（1）对象在新生代躲过很多次垃圾回收，达到一定年龄了  （‐XX:MaxTenuringThreshold 来设定分代年龄）（2）动态年龄判断规则，如果一旦发生某次新生代GC过后，存活对象超过Survivor的50%此时就会判断下，比如年龄1、2、3、4岁的对象总大小已经超过了Survivor的50%，此时4岁以上的对象全部进入老年代，这就是动态年龄判断规则</code></pre><p>2.大对象Region</p><pre><code>分配策略：    G1是有专门的存放大对象的Region区域    判断规则：一个大对象超过了一个Region大小的50%，如果超过Region大小，会占用多个Region回收规则：    在进行新生代回收和老年代回收的时候也顺便带着大对象Region一起回收的</code></pre><p>3.什么时候触发新生代和老年代的混合回收？</p><pre><code>G1有一个参数：-XX:InitiatingHeapOccupancyPercent ，默认45%，如果老年代占据堆内存45%的Region的时候，此时就会尝试触发一个新生代和老年代一起回收的混合阶段</code></pre><p>4.G1垃圾回收过程</p><pre><code>（1）.初始标记   STW ，标记一个GC Roots直接能引用的对象     对各个线程栈内存中的局部变量代表的GC Roots,以及方法区中静态变量的GC Roots，进行扫描，标记出来他们直接引用的哪些对象（2）.并发标记           与应用程序并行运行，同时进行GC Roots追踪，从GC Roots开始追踪所有存活的对象        而且此阶段对对象做出的一些修改 记录起来，比如那个对象被新建了（new ），哪些对象失去了引用（线程栈执行结束）（3）.最终标记  STW，重新处理下哪些是存活对象，哪些是垃圾对象 (4). 混合回收（包含新生代、老年代、大对象）           这个阶段会计算老年代中每个Region中存活对象的数量，存活对象占比，还有执行垃圾回收的预期性能和效率，然后会停止应用程序，全力进行垃圾回收，此时选择部分Region进行回收，因此必须让垃圾回收的停顿时间控制在我们指定的范围内，比如老年代1000个Region都满了，回收800个Region正好满足200ms的停顿，那么此次回收就会回收800个Region，尽量将GC控制在可控范围内，此时回收的Region可能会是 从新生代、老年代、大对象中个字挑选一些Region来进行回收，尽量回收更多的垃圾         真正回收的时候会STW，流程是先STW，然后恢复，然后在STW，在恢复        ‐XX:G1MixedGCCountTarget  就是在混合阶段回收的构成中，执行几次混合回收（默认8次）‐XX:G1HeapWastePercent 默认5%，在混合回收过程中，对Region都是基于复制算法进行，都是把要回收的Region里的存活对象放入其它Region中，然后这个Region的垃圾对象全部清除掉。这种回收过程就会空出来Region，一旦空出来Region达到堆内存的5%，此时就会立刻停止垃圾回收，意味着本次混合回收结束G1都是基于复制算法进行Region的回收，就不会出现CMS的内存碎片‐XX:G1MixedGCLiveThresholdPercent 默认值85%，回收Region的时候，存活对象必须低于85%的Region才进行回收如果在进行Mixed回收的过程中，此时万一出现拷贝过程中没有空闲Region来承载自己的存活对象了，就会触发一次失败。一旦失败，立马就会切换为停止系统程序，然后采用单线程进行标志、清理、压缩整理，从而空闲出一批Region。当然这个阶段肯定极其慢的    </code></pre><p> young mixed</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> JVM </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> JVM </tag>
+            
+            <tag> G1 </tag>
             
         </tags>
       
