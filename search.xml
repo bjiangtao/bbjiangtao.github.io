@@ -4,6 +4,220 @@
   
     
     <entry>
+      <title>JVM参数设置</title>
+      <link href="/2020/06/18/%E5%AD%A6%E4%B9%A0/JVM%E5%8F%82%E6%95%B0%E8%AE%BE%E7%BD%AE/"/>
+      <url>/2020/06/18/%E5%AD%A6%E4%B9%A0/JVM%E5%8F%82%E6%95%B0%E8%AE%BE%E7%BD%AE/</url>
+      
+        <content type="html"><![CDATA[<p>每台服务器 支持  1000 Qps</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> JVM </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> JVM </tag>
+            
+            <tag> 参数设置 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>G1</title>
+      <link href="/2020/06/18/%E5%AD%A6%E4%B9%A0/G1%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%9F/"/>
+      <url>/2020/06/18/%E5%AD%A6%E4%B9%A0/G1%E5%9E%83%E5%9C%BE%E5%9B%9E%E6%94%B6%E6%9C%9F/</url>
+      
+        <content type="html"><![CDATA[<p>-XX:UserG1GC,默认指定G1垃圾回收器</p><p>默认Region 大小，堆空间/2048，可通过参数设定Region大小,‐XX:G1HeapRegionSize -&gt; 指定分区大小(1MB~32MB，且必须是2的幂)</p><p>新生代内存初始空间(默认整堆5%)，可通过‐XX:G1NewSizePercent 调整</p><p>系统运行过程中新生代会不断扩大，默认不找过60%，可通过‐XX:G1MaxNewSizePercent 调整</p><p>本身保留了Survivor和Eden的概念，新生代，通过复制算法来进行垃圾回收</p><p>因为GC可以设定目标GC停顿时间，‐XX:MaxGCPauseMillis  （默认200ms） </p><p>1.对象什么时候进入老年代呢？</p><pre><code>（1）对象在新生代躲过很多次垃圾回收，达到一定年龄了  （‐XX:MaxTenuringThreshold 来设定分代年龄）（2）动态年龄判断规则，如果一旦发生某次新生代GC过后，存活对象超过Survivor的50%此时就会判断下，比如年龄1、2、3、4岁的对象总大小已经超过了Survivor的50%，此时4岁以上的对象全部进入老年代，这就是动态年龄判断规则</code></pre><p>2.大对象Region</p><pre><code>分配策略：    G1是有专门的存放大对象的Region区域    判断规则：一个大对象超过了一个Region大小的50%，如果超过Region大小，会占用多个Region回收规则：    在进行新生代回收和老年代回收的时候也顺便带着大对象Region一起回收的</code></pre><p>3.什么时候触发新生代和老年代的混合回收？</p><pre><code>G1有一个参数：-XX:InitiatingHeapOccupancyPercent ，默认45%，如果老年代占据堆内存45%的Region的时候，此时就会尝试触发一个新生代和老年代一起回收的混合阶段</code></pre><p>4.G1垃圾回收过程</p><pre><code>（1）.初始标记   STW ，标记一个GC Roots直接能引用的对象     对各个线程栈内存中的局部变量代表的GC Roots,以及方法区中静态变量的GC Roots，进行扫描，标记出来他们直接引用的哪些对象（2）.并发标记           与应用程序并行运行，同时进行GC Roots追踪，从GC Roots开始追踪所有存活的对象        而且此阶段对对象做出的一些修改 记录起来，比如那个对象被新建了（new ），哪些对象失去了引用（线程栈执行结束）（3）.最终标记  STW，重新处理下哪些是存活对象，哪些是垃圾对象 (4). 混合回收（包含新生代、老年代、大对象）           这个阶段会计算老年代中每个Region中存活对象的数量，存活对象占比，还有执行垃圾回收的预期性能和效率，然后会停止应用程序，全力进行垃圾回收，此时选择部分Region进行回收，因此必须让垃圾回收的停顿时间控制在我们指定的范围内，比如老年代1000个Region都满了，回收800个Region正好满足200ms的停顿，那么此次回收就会回收800个Region，尽量将GC控制在可控范围内，此时回收的Region可能会是 从新生代、老年代、大对象中个字挑选一些Region来进行回收，尽量回收更多的垃圾         真正回收的时候会STW，流程是先STW，然后恢复，然后在STW，在恢复        ‐XX:G1MixedGCCountTarget  就是在混合阶段回收的构成中，执行几次混合回收（默认8次）‐XX:G1HeapWastePercent 默认5%，在混合回收过程中，对Region都是基于复制算法进行，都是把要回收的Region里的存活对象放入其它Region中，然后这个Region的垃圾对象全部清除掉。这种回收过程就会空出来Region，一旦空出来Region达到堆内存的5%，此时就会立刻停止垃圾回收，意味着本次混合回收结束G1都是基于复制算法进行Region的回收，就不会出现CMS的内存碎片‐XX:G1MixedGCLiveThresholdPercent 默认值85%，回收Region的时候，存活对象必须低于85%的Region才进行回收如果在进行Mixed回收的过程中，此时万一出现拷贝过程中没有空闲Region来承载自己的存活对象了，就会触发一次失败。一旦失败，立马就会切换为停止系统程序，然后采用单线程进行标志、清理、压缩整理，从而空闲出一批Region。当然这个阶段肯定极其慢的    </code></pre><p> young mixed</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> JVM </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> JVM </tag>
+            
+            <tag> G1 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>jvm分析</title>
+      <link href="/2020/06/18/%E5%AD%A6%E4%B9%A0/jvm%E5%88%86%E6%9E%90/"/>
+      <url>/2020/06/18/%E5%AD%A6%E4%B9%A0/jvm%E5%88%86%E6%9E%90/</url>
+      
+        <content type="html"><![CDATA[<p>jstat -gc pid  查看jvm运行情况</p><p> S0C    S1C    S0U    S1U      EC       EU        OC         OU       PC     PU    YGC     YGCT    FGC    FGCT     GCT<br> 0.0   11264.0  0.0   11264.0 109568.0 16384.0   100352.0   72022.1   65536.0 36242.8    314    5.842   0      0.000    5.842</p><p>S0C  from Survivor区的大小            0.0<br>S1C  to Survivor区的大小             11264.0   11<br>S0U  from Survivor当前使用内存的大小      0.0<br>S1U  to Survivor当前使用内存的大小        11264.0  11<br>EC   eden区的大小                      109568.0     107<br>EU   eden区当前使用的大小             16384.0     16<br>OC   老年代的大小                        100352.0    98<br>OU   老年代当前使用的大小             72022.</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> JVM </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> JVM </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>我们的代码如何运行起来</title>
+      <link href="/2020/06/04/%E5%AD%A6%E4%B9%A0/jvm%E7%9A%84%E4%BB%A3%E7%A0%81%E8%BF%90%E8%A1%8C/"/>
+      <url>/2020/06/04/%E5%AD%A6%E4%B9%A0/jvm%E7%9A%84%E4%BB%A3%E7%A0%81%E8%BF%90%E8%A1%8C/</url>
+      
+        <content type="html"><![CDATA[<p>JVM的核心运行流程</p><p>JVM的类加载器</p><pre><code>类加载器  准备--&gt;初始化--&gt;</code></pre><p>JVM的内存区域</p><pre><code>JVM参数设置参考1.计算接口每秒的请求次数2.计算接口耗时3.计算接口本身大概需要多大的内存，核心类对象占用内存的大小4.计算每秒中发起的请求，对内存的占用。核心接口所占内存乘以10-20倍，计算出5.运行分析一下，多久触发一个GC。6.计算需要多少台机器</code></pre><p>GC日志</p><pre><code>日常打印:平常开启    -Xloggc:gc.log -XX:+PrintGCDetails -XX:+PrintGCDateStamps -XX:+PrintGCCause排查打印:在日常打印基础上添加下列参数    -XX:+PrintGCApplicationConcurrentTime -XX:+PrintGCApplicationStoppedTime -XX:+PrintSafepointStatistics -XX:PrintSafepointStatisticsCount=1    -XX:+PrintHeapAtGC -XX:+PrintTLAB -XX:+PrintReferenceGC -XX:+PrintTenuringDistribution</code></pre><p>产生FullGC的原因</p><pre><code>1.每次minorGC之前，检查一下 【老年代可用内存空间】&lt;【准备升入】2.某次minorGC之后，升入老年代的对象几百M，老年代空间不足3.CMS老年代的使用空间大小超过了92%</code></pre><p>JVM优化</p><pre><code>1.survivor空间够不够（核心还是这步）2.晋升老年代的次数调整，根据逻辑，如果是单例对象可以把参数调小3.大对象直接晋升老年代。因为大对象往往是代码的List缓存之类的4.指定垃圾回收器5.参数设置参考    -Xms3072m -Xmx3072m -Xmn2028m -Xss512k -XX:PermSize=256m -XX:MaxPermSize=256m -XX:SurvivorRatio=8 -XX:MaxTenuringThreshold=5 -XX:PretenureSizeThreshold=1m -XX:+UseG1GC堆设置3G，年轻代2G，栈的内存为512k，永久代为256m，新生代比例为8:1:1,对象晋升老年代次数为5次，超过1M的大对象直接晋升老年代，使用G1垃圾回收期优化参考模型    每秒占用多少内存    多长时间出发一个minorGC    minorGC过后存活多少对象    Survivor空间是否足够用    会不会因为survivor空间不够，导致直接进入老年代    会不会因为动态年龄判断规则进入老年代</code></pre><p>垃圾回收机制</p><pre><code>分代回收parNew</code></pre>]]></content>
+      
+      
+      <categories>
+          
+          <category> JVM </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> JVM </tag>
+            
+            <tag> GC日志 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>netty</title>
+      <link href="/2020/06/04/%E5%AD%A6%E4%B9%A0/netty/"/>
+      <url>/2020/06/04/%E5%AD%A6%E4%B9%A0/netty/</url>
+      
+        <content type="html"><![CDATA[<p>netty整体回顾</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 网络 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 网络 </tag>
+            
+            <tag> netty </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>网络和IO</title>
+      <link href="/2020/06/04/%E5%AD%A6%E4%B9%A0/%E7%BD%91%E7%BB%9C%E5%92%8CIO/"/>
+      <url>/2020/06/04/%E5%AD%A6%E4%B9%A0/%E7%BD%91%E7%BB%9C%E5%92%8CIO/</url>
+      
+        <content type="html"><![CDATA[<p>1、Netty的架构原理图能画一下吗，他是如何体现Reactor架构思想的？</p><p>2、能说说你对Netty堆外内存的理解吗？什么情况下会使用堆外内存？</p><p>3、你遇到过堆外内存溢出或者堆外内存泄漏的场景吗？怎么解决的？</p><p>4、能聊聊你对零拷贝技术原理的理解吗？他到底是如何提升性能的？</p><p>5、你知道哪些开源的中间件系统用了零拷贝技术吗？为什么那些系统要使用零拷贝技术？</p><p>6、你了解过在操作系统层面，系统区内存和用户区内存的关系是什么吗？</p><p>7、说说你对序列化机制的理解，了解过Protobuf吗？他是用来干什么的知道吗？</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 网络 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 网络 </tag>
+            
+            <tag> IO </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>volatile和synchronize的理解</title>
+      <link href="/2020/06/04/%E5%AD%A6%E4%B9%A0/volatile%E5%92%8Csynchronized%E7%9A%84%E7%90%86%E8%A7%A3/"/>
+      <url>/2020/06/04/%E5%AD%A6%E4%B9%A0/volatile%E5%92%8Csynchronized%E7%9A%84%E7%90%86%E8%A7%A3/</url>
+      
+        <content type="html"><![CDATA[]]></content>
+      
+      
+      <categories>
+          
+          <category> jvm </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> jvm </tag>
+            
+            <tag> 并发 </tag>
+            
+            <tag> JMM </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>系统安全</title>
+      <link href="/2020/06/04/%E5%AD%A6%E4%B9%A0/%E7%B3%BB%E7%BB%9F%E5%AE%89%E5%85%A8/"/>
+      <url>/2020/06/04/%E5%AD%A6%E4%B9%A0/%E7%B3%BB%E7%BB%9F%E5%AE%89%E5%85%A8/</url>
+      
+        <content type="html"><![CDATA[<p>1.XSS攻击。分为持久性攻击和非持久性攻击。主要避免方式就是保护好cookie，cookie设置httpOnly能够避免js去操作cookie，所有的内容行提交做一些参数校验，把html和js代码内容的提交无效话。</p><p>2.sql注入攻击。sql预编译</p><p>3.CSRF攻击。令牌机制、验证码机制。</p><p>4.文件上传类攻击。验证文件类型，文件大小，对文件进行压缩并且重命名。</p><p>5.DDoS攻击。</p><pre><code>SYN Flood攻击。服务端TCP端口处于SYN_RECV状态，占用端口资源。Http Flood攻击限流操作</code></pre><p>整体上避免攻击，从网关层把这些攻击处理了。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 安全 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 安全 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>JVM优雅退出</title>
       <link href="/2020/05/13/%E5%AD%A6%E4%B9%A0/jvm%E4%BC%98%E9%9B%85%E9%80%80%E5%87%BA/"/>
       <url>/2020/05/13/%E5%AD%A6%E4%B9%A0/jvm%E4%BC%98%E9%9B%85%E9%80%80%E5%87%BA/</url>
@@ -56,6 +270,31 @@
     
     
     <entry>
+      <title>zk</title>
+      <link href="/2020/05/07/%E5%AD%A6%E4%B9%A0/zk/"/>
+      <url>/2020/05/07/%E5%AD%A6%E4%B9%A0/zk/</url>
+      
+        <content type="html"><![CDATA[<p>分布式协调</p><p>分布式锁</p><p>元数据配置管理</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> zk </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> zk </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
       <title>分布式锁</title>
       <link href="/2020/05/07/%E5%AD%A6%E4%B9%A0/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/"/>
       <url>/2020/05/07/%E5%AD%A6%E4%B9%A0/%E5%88%86%E5%B8%83%E5%BC%8F%E9%94%81/</url>
@@ -75,31 +314,6 @@
             <tag> zk </tag>
             
             <tag> redis </tag>
-            
-        </tags>
-      
-    </entry>
-    
-    
-    
-    <entry>
-      <title>zk</title>
-      <link href="/2020/05/07/%E5%AD%A6%E4%B9%A0/zk/"/>
-      <url>/2020/05/07/%E5%AD%A6%E4%B9%A0/zk/</url>
-      
-        <content type="html"><![CDATA[<p>分布式协调</p><p>分布式锁</p><p>元数据配置管理</p>]]></content>
-      
-      
-      <categories>
-          
-          <category> zk </category>
-          
-      </categories>
-      
-      
-        <tags>
-            
-            <tag> zk </tag>
             
         </tags>
       
@@ -467,31 +681,6 @@
     
     <entry>
       <title>JVM</title>
-      <link href="/2020/04/29/%E5%AD%A6%E4%B9%A0/java%20-%20%E5%89%AF%E6%9C%AC/"/>
-      <url>/2020/04/29/%E5%AD%A6%E4%B9%A0/java%20-%20%E5%89%AF%E6%9C%AC/</url>
-      
-        <content type="html"><![CDATA[<h2 id="1-jvm内存模型"><a href="#1-jvm内存模型" class="headerlink" title="1.jvm内存模型"></a>1.jvm内存模型</h2><h2 id="2-GC流程"><a href="#2-GC流程" class="headerlink" title="2.GC流程"></a>2.GC流程</h2><p>新生代创建对象，新生代区域不够的时候，会触发YGC,此时新生代会触发GC，对象进行清理。根据可达性算法对新生代空间的对象进行标记，通过复制算法进行新生代的对象回收。在多YGC过后，对象经过多次YGC后，然后就可以进行进行对象晋升，把该对象晋升到老年代。多次YGC之后，对象晋升老年代时候发现老年代的内存空间不足，会对老年代进行GC，通过</p><h2 id="3-常见的垃圾回收器"><a href="#3-常见的垃圾回收器" class="headerlink" title="3.常见的垃圾回收器"></a>3.常见的垃圾回收器</h2><p>CMS</p><p>ZGC</p><h2 id="4-G1收集器详解"><a href="#4-G1收集器详解" class="headerlink" title="4.G1收集器详解"></a>4.G1收集器详解</h2><p>G1垃圾收集器，取消了堆中年轻代和老年代的物理划分，但仍属于分代收集器。G1算法将堆划分为若干个Region区域。其中一部分作用于年轻代，一部分作用于老年代，还有一种专门用于存储大对象的分区。</p><p>几个概念</p><p>三色标记算法，白灰黑。白：对象没有被标记到，标记阶段结束，会被当做垃圾回收掉。灰：对象被标记了，但是它的filed还没有被标记完。黑:对象都别标记了，且它的filed也被标记完了。</p><p>新生代采用复制算法，并行进行收集，收集过程会STW</p><p>老年代回收时同时也会触发年轻代的回收，回收主要分为4个阶段：</p><p>1.初始标记（initial remark  STW）。它标记了从GC Root开始直接可达的对象</p><p>2.并发标记（concurrent mark）。这个标记阶段从GC Root开始对heap中的对象进行标记，标记线程和用户线程并发执行，并且收集各个Region的存活对象信息。</p><p>3.最终标记（remark STW）。标记那些在并发阶段发生变化的对象</p><p>4.复制/清除。（cleanup STW），这个阶段会优先对可回收空间较大的Region进行回收，即为Garbage first</p><p>G1采用的是每次只清理一部分而不是全部的Region的增量式清理，由此来保证每次GC停顿时间不会太长。</p><p>总结如下，G1是逻辑分代不是物理分代，需要知道回收的过程和停顿的阶段。此外还需要知道，G1算法允许通过JVM参数来设置Region大小，范围是1-32M（2的幂次），可以设置期望的最大停顿时间等</p>]]></content>
-      
-      
-      <categories>
-          
-          <category> java </category>
-          
-      </categories>
-      
-      
-        <tags>
-            
-            <tag> jvm </tag>
-            
-        </tags>
-      
-    </entry>
-    
-    
-    
-    <entry>
-      <title>JVM</title>
       <link href="/2020/04/29/%E5%AD%A6%E4%B9%A0/java/"/>
       <url>/2020/04/29/%E5%AD%A6%E4%B9%A0/java/</url>
       
@@ -516,23 +705,23 @@
     
     
     <entry>
-      <title>个人总结</title>
-      <link href="/2020/04/29/%E6%80%BB%E7%BB%93/%E5%B7%A5%E4%BD%9C%E6%80%BB%E7%BB%93-20200430/"/>
-      <url>/2020/04/29/%E6%80%BB%E7%BB%93/%E5%B7%A5%E4%BD%9C%E6%80%BB%E7%BB%93-20200430/</url>
+      <title>JVM</title>
+      <link href="/2020/04/29/%E5%AD%A6%E4%B9%A0/java%20-%20%E5%89%AF%E6%9C%AC/"/>
+      <url>/2020/04/29/%E5%AD%A6%E4%B9%A0/java%20-%20%E5%89%AF%E6%9C%AC/</url>
       
-        <content type="html"><![CDATA[<h2 id="工作总结："><a href="#工作总结：" class="headerlink" title="工作总结：    "></a>工作总结：    </h2><p>五一活动上线完成，测试bug偏多，上线sql有问题。测试bug整体回顾中，发现小的需求遗漏较多。可能和自己心态有关，暂未发现良好的改进方向。可以考虑换个方式做整体设计，尤其是需求分析这块，要把所有的细节点都梳理到。</p><h2 id="工作反思："><a href="#工作反思：" class="headerlink" title="工作反思："></a>工作反思：</h2><h2 id="工作改进："><a href="#工作改进：" class="headerlink" title="工作改进："></a>工作改进：</h2><p>1.上线的sql文件中，所有的update语句和delete语句都删除掉！<br>2.验证上线文档文档的方式，就是把sql文件放到内网执行一遍，而不是直接看上线文档的sql。</p>]]></content>
+        <content type="html"><![CDATA[<h2 id="1-jvm内存模型"><a href="#1-jvm内存模型" class="headerlink" title="1.jvm内存模型"></a>1.jvm内存模型</h2><h2 id="2-GC流程"><a href="#2-GC流程" class="headerlink" title="2.GC流程"></a>2.GC流程</h2><p>新生代创建对象，新生代区域不够的时候，会触发YGC,此时新生代会触发GC，对象进行清理。根据可达性算法对新生代空间的对象进行标记，通过复制算法进行新生代的对象回收。在多YGC过后，对象经过多次YGC后，然后就可以进行进行对象晋升，把该对象晋升到老年代。多次YGC之后，对象晋升老年代时候发现老年代的内存空间不足，会对老年代进行GC，通过</p><h2 id="3-常见的垃圾回收器"><a href="#3-常见的垃圾回收器" class="headerlink" title="3.常见的垃圾回收器"></a>3.常见的垃圾回收器</h2><p>CMS</p><p>ZGC</p><h2 id="4-G1收集器详解"><a href="#4-G1收集器详解" class="headerlink" title="4.G1收集器详解"></a>4.G1收集器详解</h2><p>G1垃圾收集器，取消了堆中年轻代和老年代的物理划分，但仍属于分代收集器。G1算法将堆划分为若干个Region区域。其中一部分作用于年轻代，一部分作用于老年代，还有一种专门用于存储大对象的分区。</p><p>几个概念</p><p>三色标记算法，白灰黑。白：对象没有被标记到，标记阶段结束，会被当做垃圾回收掉。灰：对象被标记了，但是它的filed还没有被标记完。黑:对象都别标记了，且它的filed也被标记完了。</p><p>新生代采用复制算法，并行进行收集，收集过程会STW</p><p>老年代回收时同时也会触发年轻代的回收，回收主要分为4个阶段：</p><p>1.初始标记（initial remark  STW）。它标记了从GC Root开始直接可达的对象</p><p>2.并发标记（concurrent mark）。这个标记阶段从GC Root开始对heap中的对象进行标记，标记线程和用户线程并发执行，并且收集各个Region的存活对象信息。</p><p>3.最终标记（remark STW）。标记那些在并发阶段发生变化的对象</p><p>4.复制/清除。（cleanup STW），这个阶段会优先对可回收空间较大的Region进行回收，即为Garbage first</p><p>G1采用的是每次只清理一部分而不是全部的Region的增量式清理，由此来保证每次GC停顿时间不会太长。</p><p>总结如下，G1是逻辑分代不是物理分代，需要知道回收的过程和停顿的阶段。此外还需要知道，G1算法允许通过JVM参数来设置Region大小，范围是1-32M（2的幂次），可以设置期望的最大停顿时间等</p>]]></content>
       
       
       <categories>
           
-          <category> 总结 </category>
+          <category> java </category>
           
       </categories>
       
       
         <tags>
             
-            <tag> 工作总结 </tag>
+            <tag> jvm </tag>
             
         </tags>
       
@@ -558,6 +747,31 @@
         <tags>
             
             <tag> 生活总结 </tag>
+            
+        </tags>
+      
+    </entry>
+    
+    
+    
+    <entry>
+      <title>个人总结</title>
+      <link href="/2020/04/29/%E6%80%BB%E7%BB%93/%E5%B7%A5%E4%BD%9C%E6%80%BB%E7%BB%93-20200430/"/>
+      <url>/2020/04/29/%E6%80%BB%E7%BB%93/%E5%B7%A5%E4%BD%9C%E6%80%BB%E7%BB%93-20200430/</url>
+      
+        <content type="html"><![CDATA[<h2 id="工作总结："><a href="#工作总结：" class="headerlink" title="工作总结：    "></a>工作总结：    </h2><p>五一活动上线完成，测试bug偏多，上线sql有问题。测试bug整体回顾中，发现小的需求遗漏较多。可能和自己心态有关，暂未发现良好的改进方向。可以考虑换个方式做整体设计，尤其是需求分析这块，要把所有的细节点都梳理到。</p><h2 id="工作反思："><a href="#工作反思：" class="headerlink" title="工作反思："></a>工作反思：</h2><h2 id="工作改进："><a href="#工作改进：" class="headerlink" title="工作改进："></a>工作改进：</h2><p>1.上线的sql文件中，所有的update语句和delete语句都删除掉！<br>2.验证上线文档文档的方式，就是把sql文件放到内网执行一遍，而不是直接看上线文档的sql。</p>]]></content>
+      
+      
+      <categories>
+          
+          <category> 总结 </category>
+          
+      </categories>
+      
+      
+        <tags>
+            
+            <tag> 工作总结 </tag>
             
         </tags>
       
